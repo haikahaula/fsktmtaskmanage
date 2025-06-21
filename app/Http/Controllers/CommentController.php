@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Comment;
 use App\Models\Task;
+use App\Notifications\NewCommentNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -24,28 +25,31 @@ class CommentController extends Controller
             'content' => 'required|string|max:1000',
         ]);
 
-        $comment = new Comment();
-        $comment->task_id = $request->task_id;
-        $comment->user_id = Auth::id();
-        $comment->content = $request->content;
-        $comment->save();
+        $comment = Comment::create([
+            'task_id' => $request->task_id,
+            'user_id' => Auth::id(),
+            'content' => $request->content,
+        ]);
 
+        // Load task + assigned users + creator
+        $task = Task::with('users')->find($request->task_id);
 
-        $taskId = $request->task_id;
-        $roleId = Auth::user()->role_id;
-
-        if ($roleId == 3) { // academic staff
-            return redirect()->route('academic-staff.tasks.show', $taskId)
-                            ->with('success', 'Comment added successfully.');
-        } elseif ($roleId == 2) { // academic head
-            return redirect()->route('academic-head.tasks.show', $taskId)
-                            ->with('success', 'Comment added successfully.');
-        } elseif ($roleId == 1) { // admin
-            return redirect()->route('admin.tasks.show', $taskId)
-                            ->with('success', 'Comment added successfully.');
+        // Notify all assigned users
+        foreach ($task->users as $user) {
+            if ($user->id !== Auth::id()) {
+                $user->notify(new NewCommentNotification($comment, $task));
+            }
         }
 
-        return redirect()->back()->with('success', 'Comment added.');
+        // Notify the Head (creator) if not the one commenting
+        if ($task->created_by && $task->created_by != Auth::id()) {
+            $creator = \App\Models\User::find($task->created_by);
+            if ($creator) {
+                $creator->notify(new NewCommentNotification($comment, $task));
+            }
+        }
+
+        return redirect()->back()->with('success', 'Comment posted and users notified.');
     }
 
     // public function edit(Comment $comment)

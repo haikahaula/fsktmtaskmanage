@@ -74,9 +74,6 @@
 
                         @if (auth()->id() === $comment->user_id)
                             <div class="mt-2 space-x-2">
-                                {{-- <a href="{{ route('academic-head.comments.edit', $comment->id) }}"
-                                   class="text-sm text-blue-600 hover:underline">Edit</a> --}}
-
                                 <form action="{{ route('academic-head.comments.destroy', $comment->id) }}"
                                       method="POST" class="inline"
                                       onsubmit="return confirm('Are you sure you want to delete this comment?');">

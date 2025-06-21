@@ -27,7 +27,6 @@
                     <td class="border px-4 py-2">{{ $doc->original_name }}</td>
                     <td class="border px-4 py-2 space-x-2">
                         <a href="{{ route('academic-head.documents.download', $doc->id) }}" class="text-blue-600 underline">View</a>
-                        {{-- <a href="{{ route('academic-head.documents.edit', $doc->id) }}" class="text-yellow-600 underline ml-2">Edit</a> --}}
                         @if(auth()->id() === $doc->user_id || auth()->user()->role_id === 1)
                             <form action="{{ route('documents.destroy', $doc->id) }}" method="POST" class="inline ml-2" onsubmit="return confirm('Are you sure you want to delete this document?');">
                                 @csrf

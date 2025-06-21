@@ -25,8 +25,8 @@
         @endif
 
         <div class="overflow-x-auto">
-            <table class="w-full border-collapse border border-gray-300">
-                <thead class="bg-gray-100">
+              <table class="w-full table-auto border-collapse bg-white rounded shadow">
+                <thead class="bg-gray-200 text-left">
                     <tr>
                         <th class="border px-4 py-2">No.</th>
                         <th class="border px-4 py-2">Staff ID</th>
